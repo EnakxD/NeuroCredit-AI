@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NeuroCredit — Financial RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,600;0,800;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #060610;
+  --bg2:      #0d0d1f;
+  --bg3:      #13132a;
+  --bg4:      #1a1a35;
+  --border:   rgba(120,100,255,0.15);
+  --border2:  rgba(120,100,255,0.35);
+  --text:     #e8e8ff;
+  --muted:    #7070a0;
+  --accent:   #6c5ce7;
+  --accent2:  #a29bfe;
+  --cyan:     #00cec9;
+  --green:    #00b894;
+  --amber:    #fdcb6e;
+  --red:      #e17055;
+  --pink:     #fd79a8;
+  --gold:     #f9ca24;
+  --silver:   #b2bec3;
+  --bronze:   #e17055;
+  --xp-color: #fdcb6e;
+  --glow-p:   rgba(108,92,231,0.4);
+  --glow-c:   rgba(0,206,201,0.35);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Exo 2',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* ── Animated starfield ── */
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.star{position:absolute;border-radius:50%;animation:twinkle var(--d,3s) ease-in-out infinite var(--del,0s);}
+@keyframes twinkle{0%,100%{opacity:0.2;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+
+/* Grid overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(108,92,231,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(108,92,231,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:64px;
+  background:rgba(6,6,16,0.9);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.4rem;
+  letter-spacing:0.08em;text-transform:uppercase;
+  background:linear-gradient(135deg,#a29bfe,#00cec9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  display:flex;align-items:center;gap:8px;
+}
+.logo-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  box-shadow:0 0 16px var(--glow-p);
+  flex-shrink:0;
+  -webkit-text-fill-color:initial;
+}
+.nav-center{display:flex;gap:2px;}
+.nav-tab{
+  font-family:'Rajdhani',sans-serif;font-weight:600;
+  font-size:0.82rem;letter-spacing:0.06em;text-transform:uppercase;
+  padding:7px 16px;border-radius:6px;border:none;cursor:pointer;
+  background:transparent;color:var(--muted);transition:all 0.2s;
+}
+.nav-tab:hover{color:var(--text);background:rgba(108,92,231,0.1);}
+.nav-tab.active{color:var(--accent2);background:rgba(108,92,231,0.18);border:1px solid var(--border);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.live-badge{
+  font-family:'Share Tech Mono',monospace;font-size:0.65rem;
+  padding:4px 10px;border-radius:4px;
+  background:rgba(0,184,148,0.1);color:var(--green);
+  border:1px solid rgba(0,184,148,0.25);
+  display:flex;align-items:center;gap:5px;
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ── PAGES ── */
+.page{display:none;padding-top:80px;min-height:100vh;position:relative;z-index:1;}
+.page.active{display:block;}
+
+/* ════════════════════════════════════
+   HOME PAGE
+════════════════════════════════════ */
+.hero{
+  text-align:center;padding:5rem 2rem 3rem;
+  position:relative;
+}
+.hero-orb{
+  position:absolute;top:-100px;left:50%;transform:translateX(-50%);
+  width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(108,92,231,0.12) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Share Tech Mono',monospace;font-size:0.7rem;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid rgba(0,206,201,0.25);
+  background:rgba(0,206,201,0.07);padding:5px 14px;border-radius:4px;
+  margin-bottom:2rem;
+}
+h1{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:clamp(3rem,7vw,5.5rem);line-height:0.95;
+  letter-spacing:0.02em;text-transform:uppercase;
+  margin-bottom:1.2rem;
+}
+h1 .grad{
+  background:linear-gradient(135deg,#a29bfe 0%,#00cec9 50%,#fdcb6e 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{
+  font-size:1rem;color:var(--muted);max-width:520px;
+  margin:0 auto 3rem;line-height:1.8;font-weight:300;
+}
+
+/* 3D floating card on hero */
+.hero-3d-wrap{
+  perspective:1000px;max-width:460px;margin:0 auto 4rem;
+}
+.hero-3d-card{
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  border:1px solid var(--border2);border-radius:20px;
+  padding:2rem;position:relative;overflow:hidden;
+  transform:rotateX(8deg) rotateY(-4deg);
+  transform-style:preserve-3d;
+  box-shadow:
+    0 40px 80px rgba(0,0,0,0.6),
+    0 0 40px rgba(108,92,231,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  transition:transform 0.3s ease;
+  cursor:default;
+}
+.hero-3d-card:hover{transform:rotateX(2deg) rotateY(0deg);}
+.hero-3d-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(108,92,231,0.08),transparent 60%,rgba(0,206,201,0.06));
+  pointer-events:none;
+}
+.card-hologram{
+  position:absolute;top:0;right:0;width:120px;height:120px;
+  background:conic-gradient(from 0deg,transparent,rgba(108,92,231,0.3),transparent,rgba(0,206,201,0.25),transparent);
+  border-radius:0 20px 0 0;
+  animation:hologram 4s linear infinite;
+  opacity:0.5;
+}
+@keyframes hologram{to{transform:rotate(360deg);}}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;}
+.card-chip{
+  width:44px;height:32px;border-radius:6px;
+  background:linear-gradient(135deg,#fdcb6e,#e17055);
+  box-shadow:0 2px 12px rgba(253,203,110,0.3);
+  display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px;
+}
+.card-chip-cell{background:rgba(0,0,0,0.25);border-radius:2px;}
+.card-network{
+  font-family:'Share Tech Mono',monospace;font-size:0.6rem;
+  color:var(--accent2);letter-spacing:0.1em;
+  border:1px solid var(--border);padding:3px 8px;border-radius:4px;
+}
+.card-score-display{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:3.5rem;letter-spacing:-0.02em;
+  color:#fff;margin-bottom:0.2rem;
+  text-shadow:0 0 30px rgba(162,155,254,0.5);
+}
+.card-score-label{
+  font-family:'Share Tech Mono',monospace;font-size:0.65rem;
+  color:var(--muted);letter-spacing:0.1em;margin-bottom:1.2rem;
+}
+.card-level-row{
+  display:flex;justify-content:space-between;align-items:center;
+}
+.card-level-badge{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.9rem;
+  color:var(--gold);letter-spacing:0.05em;
+}
+.level-num{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,#f9ca24,#e17055);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:700;color:#000;
+  box-shadow:0 0 12px rgba(249,202,36,0.4);
+}
+.card-wallet{
+  font-family:'Share Tech Mono',monospace;font-size:0.62rem;
+  color:var(--muted);
+}
+
+/* ── hero stats ── */
+.hero-stats{
+  display:flex;justify-content:center;gap:4rem;margin-bottom:3rem;
+}
+.stat-item{text-align:center;}
+.stat-num{
+  font-family:'Rajdhani',sans-serif;font-size:2.2rem;font-weight:700;
+  background:linear-gradient(135deg,var(--accent2),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.stat-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;}
+
+.cta-btn{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:1rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:14px 36px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),#4a3fa0);
+  color:#fff;transition:all 0.25s;
+  box-shadow:0 6px 30px rgba(108,92,231,0.4),inset 0 1px 0 rgba(255,255,255,0.1);
+  position:relative;overflow:hidden;
+}
+.cta-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent,rgba(255,255,255,0.08));
+}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(108,92,231,0.55);}
+.cta-btn:active{transform:scale(0.97);}
+
+/* Feature cards */
+.features{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1rem;max-width:1000px;margin:0 auto 5rem;padding:0 2rem;
+}
+.feat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:16px;padding:1.6rem;
+  position:relative;overflow:hidden;
+  transition:all 0.3s;
+  transform:perspective(800px) rotateX(0deg);
+}
+.feat-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(108,92,231,0.06),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.feat-card:hover{
+  border-color:var(--border2);
+  transform:perspective(800px) rotateX(-3deg) translateY(-4px);
+  box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 20px rgba(108,92,231,0.15);
+}
+.feat-card:hover::before{opacity:1;}
+.feat-icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;margin-bottom:1rem;
+  background:var(--bg3);border:1px solid var(--border);
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);
+}
+.feat-card h3{
+  font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;
+  letter-spacing:0.05em;margin-bottom:0.5rem;
+}
+.feat-card p{font-size:0.8rem;color:var(--muted);line-height:1.7;}
+
+/* ════════════════════════════════════
+   GAMIFICATION PANEL (always visible after score)
+════════════════════════════════════ */
+.game-hud{
+  position:fixed;right:0;top:50%;transform:translateY(-50%);
+  z-index:150;display:none;
+  flex-direction:column;gap:8px;
+  padding:12px 8px;
+}
+.game-hud.show{display:flex;}
+.hud-pill{
+  background:rgba(13,13,31,0.95);
+  border:1px solid var(--border);border-right:none;
+  border-radius:10px 0 0 10px;
+  padding:10px 14px;cursor:pointer;
+  transition:all 0.2s;min-width:52px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.hud-pill:hover{background:var(--bg3);border-color:var(--border2);}
+.hud-pill-icon{font-size:1.1rem;}
+.hud-pill-label{font-size:0.52rem;font-family:'Share Tech Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
+.hud-pill-val{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;color:var(--gold);}
+
+/* ════════════════════════════════════
+   APPLY PAGE
+════════════════════════════════════ */
+.form-container{
+  max-width:800px;margin:0 auto;
+  padding:2rem 2rem 4rem;
+}
+.form-header{margin-bottom:2rem;}
+.form-header h2{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:2rem;letter-spacing:0.05em;text-transform:uppercase;
+  margin-bottom:0.4rem;
+}
+.form-header p{font-size:0.85rem;color:var(--muted);}
+
+/* XP progress bar at top of form */
+.xp-bar-wrap{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:1rem 1.4rem;margin-bottom:1.5rem;
+  display:flex;align-items:center;gap:1rem;
+}
+.xp-avatar{
+  width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;flex-shrink:0;
+  box-shadow:0 0 20px var(--glow-p);
+  position:relative;
+}
+.xp-avatar-level{
+  position:absolute;bottom:-4px;right:-4px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--gold);color:#000;
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.62rem;display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--bg2);
+}
+.xp-info{flex:1;}
+.xp-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:1rem;letter-spacing:0.05em;margin-bottom:2px;
+}
+.xp-subtitle{font-size:0.72rem;color:var(--muted);margin-bottom:8px;}
+.xp-bar-track{
+  height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;
+  position:relative;
+}
+.xp-bar-fill{
+  height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--accent),var(--cyan));
+  transition:width 1s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 0 8px var(--glow-c);
+  width:0%;
+}
+.xp-bar-shine{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.3) 50%,transparent 100%);
+  animation:shine 2s ease-in-out infinite;
+  transform:translateX(-100%);
+}
+@keyframes shine{to{transform:translateX(200%);}}
+.xp-numbers{
+  display:flex;justify-content:space-between;
+  font-family:'Share Tech Mono',monospace;font-size:0.62rem;
+  color:var(--muted);margin-top:4px;
+}
+
+.form-section{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:16px;padding:1.6rem;margin-bottom:1rem;
+  position:relative;overflow:hidden;
+  transition:border-color 0.3s;
+}
+.form-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--cyan));
+  opacity:0;transition:opacity 0.3s;
+}
+.form-section:focus-within{border-color:var(--border2);}
+.form-section:focus-within::before{opacity:1;}
+
+.section-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--accent2);margin-bottom:1.4rem;
+  display:flex;align-items:center;gap:10px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-icon{
+  width:26px;height:26px;border-radius:6px;
+  background:rgba(108,92,231,0.15);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+}
+
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.field-grid.three{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{
+  font-size:0.72rem;font-weight:600;color:var(--muted);
+  letter-spacing:0.05em;text-transform:uppercase;
+}
+.field input,.field select{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:10px 13px;
+  font-family:'Share Tech Mono',monospace;font-size:0.85rem;
+  color:var(--text);outline:none;transition:all 0.2s;
+  -webkit-appearance:none;
+}
+.field input:focus,.field select:focus{
+  border-color:var(--accent2);
+  box-shadow:0 0 0 3px rgba(108,92,231,0.15);
+}
+.field select option{background:#13132a;}
+.field .hint{font-size:0.65rem;color:var(--muted);opacity:0.7;}
+
+.slider-field{display:flex;flex-direction:column;gap:6px;}
+.slider-label-row{display:flex;justify-content:space-between;align-items:center;}
+.slider-label-row label{
+  font-size:0.72rem;font-weight:600;color:var(--muted);
+  letter-spacing:0.05em;text-transform:uppercase;
+}
+.slider-val{
+  font-family:'Share Tech Mono',monospace;font-size:0.8rem;
+  color:var(--accent2);
+  background:rgba(108,92,231,0.12);padding:2px 8px;border-radius:4px;
+}
+.field input[type=range]{
+  -webkit-appearance:none;width:100%;height:6px;
+  border-radius:3px;border:none;outline:none;cursor:pointer;
+  background:var(--bg4);
+}
+.field input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent2),var(--cyan));
+  cursor:pointer;
+  box-shadow:0 0 10px rgba(162,155,254,0.5);
+  border:2px solid var(--bg);
+}
+
+.wallet-field input{
+  font-family:'Share Tech Mono',monospace;font-size:0.78rem;width:100%;
+}
+
+.submit-row{display:flex;justify-content:center;margin-top:2rem;}
+.submit-btn{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:16px 56px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),#4a3fa0);
+  color:#fff;transition:all 0.25s;
+  box-shadow:0 8px 32px rgba(108,92,231,0.4),inset 0 1px 0 rgba(255,255,255,0.1);
+  position:relative;overflow:hidden;
+}
+.submit-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,0.06));
+}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(108,92,231,0.55);}
+.submit-btn:active{transform:scale(0.97);}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ════════════════════════════════════
+   RESULT MODAL — GAMIFIED
+════════════════════════════════════ */
+.result-overlay{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(4,4,14,0.95);backdrop-filter:blur(16px);
+  align-items:center;justify-content:center;padding:1rem;
+  overflow-y:auto;
+}
+.result-overlay.show{display:flex;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.result-card{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:24px;
+  width:min(700px,96vw);
+  position:relative;overflow:hidden;
+  animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:none}}
+.result-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--cyan),var(--gold));
+}
+
+.result-header{
+  padding:1.8rem 2rem 0;
+  display:flex;justify-content:space-between;align-items:flex-start;
+}
+.result-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:1rem;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--muted);
+}
+.result-close{
+  background:rgba(255,255,255,0.06);border:1px solid var(--border);
+  color:var(--muted);border-radius:8px;
+  padding:5px 12px;cursor:pointer;font-size:1rem;
+  transition:all 0.2s;font-family:'Rajdhani',sans-serif;
+}
+.result-close:hover{background:rgba(255,255,255,0.12);color:var(--text);}
+
+/* top section: avatar + score */
+.result-top{
+  display:grid;grid-template-columns:auto 1fr;gap:2rem;
+  padding:1.5rem 2rem;align-items:center;
+}
+
+/* Risk Avatar */
+.risk-avatar-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.risk-avatar{
+  width:110px;height:110px;border-radius:20px;
+  position:relative;display:flex;align-items:center;justify-content:center;
+  font-size:3.5rem;
+  background:var(--bg3);border:2px solid var(--border2);
+  box-shadow:0 0 40px var(--avatar-glow,rgba(108,92,231,0.4));
+  transition:all 0.5s;
+  transform-style:preserve-3d;
+  animation:avatarFloat 3s ease-in-out infinite;
+}
+@keyframes avatarFloat{
+  0%,100%{transform:translateY(0) rotateY(-5deg);}
+  50%{transform:translateY(-8px) rotateY(5deg);}
+}
+.risk-avatar::after{
+  content:'';position:absolute;inset:0;border-radius:20px;
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.08),transparent 60%);
+}
+.avatar-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.78rem;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--muted);text-align:center;
+}
+.avatar-rank{
+  font-family:'Share Tech Mono',monospace;font-size:0.7rem;
+  padding:3px 10px;border-radius:4px;
+  background:rgba(108,92,231,0.15);color:var(--accent2);
+  border:1px solid var(--border);
+}
+
+/* Score display */
+.score-main{}
+.score-num-wrap{position:relative;display:inline-block;}
+.score-num{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:5rem;letter-spacing:-0.03em;line-height:1;
+  transition:color 0.5s;
+}
+.score-out-of{
+  font-family:'Share Tech Mono',monospace;font-size:0.7rem;
+  color:var(--muted);position:absolute;bottom:8px;right:-30px;
+}
+.score-grade{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:1.4rem;letter-spacing:0.05em;
+  margin-top:4px;
+}
+.score-sublabel{font-size:0.8rem;color:var(--muted);margin-top:2px;}
+
+.eligible-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.8rem;
+  padding:5px 14px;border-radius:6px;margin-top:10px;
+  letter-spacing:0.08em;text-transform:uppercase;
+}
+.eligible-yes{background:rgba(0,184,148,0.12);color:var(--green);border:1px solid rgba(0,184,148,0.3);}
+.eligible-no{background:rgba(225,112,85,0.12);color:var(--red);border:1px solid rgba(225,112,85,0.3);}
+
+/* XP earned pop */
+.xp-earned{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.9rem;letter-spacing:0.08em;
+  color:var(--gold);margin-top:8px;
+  animation:xpPop 0.5s 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes xpPop{from{opacity:0;transform:scale(0.5) translateY(10px)}to{opacity:1;transform:none}}
+
+/* Level progress row */
+.level-progress-wrap{
+  padding:0 2rem;margin-bottom:1.4rem;
+}
+.level-progress-label{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:6px;
+}
+.level-text{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.85rem;letter-spacing:0.08em;color:var(--accent2);
+}
+.level-xp{
+  font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--muted);
+}
+.level-track{height:12px;background:var(--bg4);border-radius:6px;overflow:hidden;position:relative;}
+.level-fill{
+  height:100%;border-radius:6px;
+  background:linear-gradient(90deg,var(--accent),var(--cyan));
+  transition:width 1.5s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 0 10px var(--glow-c);width:0%;position:relative;
+}
+.level-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);
+  animation:shine 2s ease-in-out infinite;
+  transform:translateX(-100%);
+}
+.level-milestone{
+  position:absolute;top:0;width:2px;background:rgba(255,255,255,0.15);height:100%;
+}
+
+/* Breakdown */
+.result-breakdown{
+  padding:0 2rem;margin-bottom:1.4rem;
+}
+.breakdown-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.bk-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+  transition:transform 0.2s;
+}
+.bk-card:hover{transform:translateY(-2px);}
+.bk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.bk-label{font-size:0.72rem;color:var(--muted);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;}
+.bk-pct{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;
+}
+.bk-track{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.bk-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
+
+/* Badges */
+.badges-section{
+  padding:0 2rem;margin-bottom:1.4rem;
+}
+.badges-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;
+}
+.badges-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.badges-grid{display:flex;gap:10px;flex-wrap:wrap;}
+.badge{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:10px;padding:10px 12px;
+  transition:all 0.25s;cursor:default;min-width:70px;
+  position:relative;
+}
+.badge.earned{
+  border-color:var(--gold);
+  background:rgba(249,202,36,0.05);
+  box-shadow:0 0 16px rgba(249,202,36,0.15);
+}
+.badge.locked{opacity:0.35;filter:grayscale(1);}
+.badge-icon{font-size:1.4rem;}
+.badge-name{
+  font-family:'Share Tech Mono',monospace;font-size:0.55rem;
+  color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:0.05em;
+}
+.badge.earned .badge-name{color:var(--gold);}
+.badge-new{
+  position:absolute;top:-5px;right:-5px;
+  background:var(--red);color:#fff;
+  font-size:0.45rem;font-family:'Rajdhani',sans-serif;font-weight:700;
+  padding:1px 4px;border-radius:3px;letter-spacing:0.05em;text-transform:uppercase;
+}
+
+/* Streak */
+.streak-row{
+  padding:0 2rem;margin-bottom:1.4rem;
+}
+.streak-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;
+  display:flex;align-items:center;gap:12px;
+}
+.streak-flame{font-size:1.8rem;animation:flicker 0.5s ease-in-out infinite alternate;}
+@keyframes flicker{from{transform:scale(1) rotate(-3deg)}to{transform:scale(1.1) rotate(3deg)}}
+.streak-text{}
+.streak-headline{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.95rem;letter-spacing:0.05em;color:var(--amber);
+}
+.streak-sub{font-size:0.72rem;color:var(--muted);}
+
+/* Mint + gauge */
+.result-bottom{
+  padding:0 2rem 2rem;
+  display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+  align-items:center;
+}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;}
+.gauge-svg{display:block;}
+
+.mint-section{display:flex;flex-direction:column;gap:10px;}
+.mint-btn{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.9rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:12px 20px;border-radius:10px;
+  border:1px solid rgba(0,206,201,0.4);
+  background:rgba(0,206,201,0.08);
+  color:var(--cyan);cursor:pointer;transition:all 0.2s;
+}
+.mint-btn:hover{background:rgba(0,206,201,0.15);border-color:rgba(0,206,201,0.65);}
+.mint-btn.minting{opacity:0.6;cursor:not-allowed;}
+.mint-status{
+  font-family:'Share Tech Mono',monospace;font-size:0.68rem;
+  color:var(--muted);
+}
+.mint-status.success{color:var(--green);}
+.txhash{font-size:0.6rem;color:var(--accent2);word-break:break-all;}
+
+/* ════════════════════════════════════
+   VERIFY PAGE
+════════════════════════════════════ */
+.verify-container{
+  max-width:580px;margin:0 auto;padding:2rem 2rem 4rem;
+}
+.verify-header{margin-bottom:2rem;}
+.verify-header h2{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:2rem;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:0.4rem;
+}
+.verify-header p{font-size:0.85rem;color:var(--muted);}
+.verify-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:16px;padding:1.8rem;
+}
+.verify-input-row{display:flex;gap:10px;margin-bottom:1.2rem;}
+.verify-input-row input{
+  flex:1;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;
+  font-family:'Share Tech Mono',monospace;font-size:0.78rem;
+  color:var(--text);outline:none;transition:border-color 0.2s;
+}
+.verify-input-row input:focus{border-color:var(--accent);}
+.verify-btn{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;
+  padding:10px 22px;border-radius:8px;border:none;
+  background:linear-gradient(135deg,var(--accent),#4a3fa0);
+  color:#fff;cursor:pointer;transition:opacity 0.2s;white-space:nowrap;
+}
+.verify-btn:hover{opacity:0.85;}
+.verify-result{
+  display:none;margin-top:1.2rem;
+  background:var(--bg3);border-radius:10px;padding:1.4rem;
+  border:1px solid var(--border);
+}
+.verify-result.show{display:block;animation:fadeIn 0.3s ease;}
+.verify-score-row{
+  display:flex;align-items:baseline;justify-content:space-between;
+  margin-bottom:1rem;
+}
+.verify-score-big{
+  font-family:'Rajdhani',sans-serif;font-size:3.5rem;
+  font-weight:700;letter-spacing:-0.04em;
+}
+.verify-meta{font-size:0.78rem;color:var(--muted);line-height:1.8;}
+.verify-not-found{
+  text-align:center;padding:1.5rem;color:var(--muted);font-size:0.85rem;
+}
+
+/* ════════════════════════════════════
+   HOW IT WORKS
+════════════════════════════════════ */
+.how-section{
+  max-width:820px;margin:0 auto;padding:2rem 2rem 4rem;
+}
+.how-section h2{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:2rem;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:2rem;
+}
+.steps{display:flex;flex-direction:column;gap:1px;}
+.step{
+  display:grid;grid-template-columns:80px 1fr;gap:1.5rem;
+  padding:1.8rem 0;border-bottom:1px solid var(--border);
+  transition:all 0.2s;
+}
+.step:last-child{border-bottom:none;}
+.step:hover .step-num{color:var(--accent2);}
+.step-num{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:2.5rem;
+  color:var(--border2);letter-spacing:-0.04em;line-height:1;
+  transition:color 0.3s;
+}
+.step-tag{
+  font-family:'Share Tech Mono',monospace;font-size:0.62rem;
+  color:var(--cyan);letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.step-body h3{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;
+  margin-bottom:6px;
+}
+.step-body p{font-size:0.84rem;color:var(--muted);line-height:1.7;}
+
+/* ════════════════════════════════════
+   FOOTER
+════════════════════════════════════ */
+footer{
+  text-align:center;padding:2rem;
+  font-family:'Share Tech Mono',monospace;font-size:0.7rem;
+  color:var(--muted);border-top:1px solid var(--border);
+  position:relative;z-index:1;
+}
+footer span{color:var(--accent2);}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:10px;padding:12px 20px;
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.9rem;
+  color:var(--text);z-index:400;
+  animation:toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* ── XP FLOAT ── */
+.xp-float{
+  position:fixed;pointer-events:none;z-index:500;
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.4rem;
+  color:var(--gold);text-shadow:0 0 10px rgba(249,202,36,0.6);
+  animation:floatUp 1.5s ease-out forwards;
+}
+@keyframes floatUp{
+  0%{opacity:1;transform:translateY(0);}
+  100%{opacity:0;transform:translateY(-80px);}
+}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .features{grid-template-columns:1fr;}
+  .result-top{grid-template-columns:1fr;text-align:center;}
+  .result-bottom{grid-template-columns:1fr;}
+  .breakdown-grid{grid-template-columns:1fr;}
+  .field-grid,.field-grid.three{grid-template-columns:1fr;}
+  .hero-stats{gap:2rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div id="stars"></div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    NeuroCredit
+  </div>
+  <div class="nav-center">
+    <button class="nav-tab active" onclick="showPage('home')">Home</button>
+    <button class="nav-tab" onclick="showPage('apply')">Get Score</button>
+    <button class="nav-tab" onclick="showPage('verify')">Verify</button>
+    <button class="nav-tab" onclick="showPage('how')">How it Works</button>
+  </div>
+  <div class="nav-right">
+    <div class="live-badge">
+      <span class="live-dot"></span>Polygon Amoy
+    </div>
+  </div>
+</nav>
+
+<!-- ── GAME HUD (sidebar) ── -->
+<div class="game-hud" id="gameHud">
+  <div class="hud-pill" title="Your Level" onclick="showPage('apply')">
+    <span class="hud-pill-icon">🏆</span>
+    <span class="hud-pill-label">Level</span>
+    <span class="hud-pill-val" id="hudLevel">—</span>
+  </div>
+  <div class="hud-pill" title="XP Points">
+    <span class="hud-pill-icon">⭐</span>
+    <span class="hud-pill-label">XP</span>
+    <span class="hud-pill-val" id="hudXP">—</span>
+  </div>
+  <div class="hud-pill" title="Badges earned">
+    <span class="hud-pill-icon">🎖️</span>
+    <span class="hud-pill-label">Badges</span>
+    <span class="hud-pill-val" id="hudBadges">0</span>
+  </div>
+  <div class="hud-pill" title="Score">
+    <span class="hud-pill-icon">💳</span>
+    <span class="hud-pill-label">Score</span>
+    <span class="hud-pill-val" id="hudScore">—</span>
+  </div>
+</div>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-orb"></div>
+    <div class="hero-tag">⚡ Frostbyte Hackathon 2026 · AI × Blockchain × FinTech</div>
+    <h1>Level Up Your<br/><span class="grad">Credit Score</span></h1>
+    <p class="hero-sub">Turn your daily habits into financial power. Alternative credit scoring on Polygon — built for 1.4B credit-invisible people who play by their own rules.</p>
+
+    <!-- 3D card preview -->
+    <div class="hero-3d-wrap">
+      <div class="hero-3d-card" id="hero3dCard">
+        <div class="card-hologram"></div>
+        <div class="card-top">
+          <div class="card-chip">
+            <div class="card-chip-cell"></div><div class="card-chip-cell"></div>
+            <div class="card-chip-cell"></div><div class="card-chip-cell"></div>
+          </div>
+          <div class="card-network">POLYGON AMOY</div>
+        </div>
+        <div class="card-score-display" id="heroScore">742</div>
+        <div class="card-score-label">CREDIT SCORE · SOUL BOUND TOKEN</div>
+        <div class="card-level-row">
+          <div class="card-level-badge">
+            <div class="level-num">7</div>
+            Level 7 Investor
+          </div>
+          <div class="card-wallet">0x71c...9f3a</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">1.4B</div>
+        <div class="stat-label">Credit Invisible</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">300–900</div>
+        <div class="stat-label">Score Range</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">14</div>
+        <div class="stat-label">AI Signals</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">&lt;1s</div>
+        <div class="stat-label">Scoring Time</div>
+      </div>
+    </div>
+
+    <button class="cta-btn" onclick="showPage('apply')">⚡ Start Your Quest</button>
+  </div>
+
+  <!-- Feature cards -->
+  <div class="features">
+    <div class="feat-card">
+      <div class="feat-icon">🧠</div>
+      <h3>XGBoost ML Engine</h3>
+      <p>14 alternative signals — UPI patterns, bill payments, savings behavior — produce a 300–900 score in under a second. No bank statement needed.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🏆</div>
+      <h3>Gamified Progression</h3>
+      <p>Earn XP, unlock badges, level up your financial avatar. From "Debt Slayer" to "Crypto Ready" — every habit counts.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⛓️</div>
+      <h3>Soul Bound Token</h3>
+      <p>Your score minted as an ERC-5484 SBT on Polygon. Non-transferable, permanently yours. Lenders verify on-chain, zero personal data exposed.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🛡️</div>
+      <h3>Privacy First</h3>
+      <p>Raw data never touches the chain. Lenders get score + eligibility only. ZK-proof layer planned for roadmap.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔥</div>
+      <h3>Streak System</h3>
+      <p>Track consecutive months of good habits. Build streaks, earn bonus XP, and watch your avatar evolve from 💀 to 👑.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚡</div>
+      <h3>Instant Access</h3>
+      <p>No branch visits, no paperwork. Built for gig workers, freelancers, and self-employed people who've been ignored by traditional finance.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ APPLY ══════════ -->
+<div id="page-apply" class="page">
+  <div class="form-container">
+    <div class="form-header">
+      <h2>⚡ Your Financial Quest</h2>
+      <p>Complete all fields to compute your credit score and earn XP. No bank statement required.</p>
+    </div>
+
+    <!-- XP Progress bar -->
+    <div class="xp-bar-wrap">
+      <div class="xp-avatar" id="formAvatar">
+        💀
+        <div class="xp-avatar-level" id="formLevel">1</div>
+      </div>
+      <div class="xp-info">
+        <div class="xp-title" id="formLevelTitle">Rookie Saver · Level 1</div>
+        <div class="xp-subtitle">Fill in your financial data to earn XP and level up</div>
+        <div class="xp-bar-track">
+          <div class="xp-bar-fill" id="formXpBar" style="width:5%">
+            <div class="xp-bar-shine"></div>
+          </div>
+        </div>
+        <div class="xp-numbers">
+          <span id="formXpCur">0 XP</span>
+          <span id="formXpMax">— XP to Level 2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wallet -->
+    <div class="form-section">
+      <div class="section-title"><div class="section-icon">🔑</div>Identity</div>
+      <div class="wallet-field">
+        <div class="field">
+          <label>Ethereum Wallet Address</label>
+          <input type="text" id="wallet" value="0x71C9857dEC5b7F2F2eFd29E6B5a89f4C0E9f3a1" placeholder="0x..."/>
+          <span class="hint">Your on-chain identity — score minted here</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPI -->
+    <div class="form-section">
+      <div class="section-title"><div class="section-icon">💸</div>Transaction Activity</div>
+      <div class="field-grid three">
+        <div class="field">
+          <label>Monthly UPI Transactions</label>
+          <input type="number" id="upi_txn_count" value="45" min="0" max="500"/>
+          <span class="hint">0–500 per month</span>
+        </div>
+        <div class="field">
+          <label>Avg UPI Amount (₹)</label>
+          <input type="number" id="upi_avg_amount" value="2800" min="0"/>
+          <span class="hint">Average per transaction</span>
+        </div>
+        <div class="slider-field field">
+          <div class="slider-label-row">
+            <label>Payment Consistency</label>
+            <span class="slider-val" id="upi_consistency_val">0.72</span>
+          </div>
+          <input type="range" id="upi_consistency" min="0" max="100" value="72"
+            oninput="updateSlider(this,'upi_consistency_val');updateFormXP()"/>
+          <span class="hint">0 = erratic · 1 = very regular</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bills -->
+    <div class="form-section">
+      <div class="section-title"><div class="section-icon">🧾</div>Payment History</div>
+      <div class="field-grid three">
+        <div class="slider-field field">
+          <div class="slider-label-row">
+            <label>Utility Bills On-Time</label>
+            <span class="slider-val" id="utility_val">0.85</span>
+          </div>
+          <input type="range" id="utility_on_time_pct" min="0" max="100" value="85"
+            oninput="updateSlider(this,'utility_val');updateFormXP()"/>
+        </div>
+        <div class="slider-field field">
+          <div class="slider-label-row">
+            <label>Mobile Bill On-Time</label>
+            <span class="slider-val" id="mobile_val">0.92</span>
+          </div>
+          <input type="range" id="mobile_on_time_pct" min="0" max="100" value="92"
+            oninput="updateSlider(this,'mobile_val');updateFormXP()"/>
+        </div>
+        <div class="slider-field field">
+          <div class="slider-label-row">
+            <label>Rent On-Time</label>
+            <span class="slider-val" id="rent_val">0.78</span>
+          </div>
+          <input type="range" id="rent_on_time_pct" min="0" max="100" value="78"
+            oninput="updateSlider(this,'rent_val');updateFormXP()"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Income -->
+    <div class="form-section">
+      <div class="section-title"><div class="section-icon">💰</div>Income Stability</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Income Sources</label>
+          <input type="number" id="income_sources" value="2" min="1" max="10" oninput="updateFormXP()"/>
+          <span class="hint">Number of distinct income sources</span>
+        </div>
+        <div class="field">
+          <label>Monthly Income Est. (₹)</label>
+          <input type="number" id="monthly_income_est" value="35000" min="0" oninput="updateFormXP()"/>
+        </div>
+        <div class="slider-field field">
+          <div class="slider-label-row">
+            <label>Income Volatility</label>
+            <span class="slider-val" id="volatility_val">0.30</span>
+          </div>
+          <input type="range" id="income_volatility" min="0" max="100" value="30"
+            oninput="updateSlider(this,'volatility_val');updateFormXP()"/>
+          <span class="hint">0 = stable · 1 = volatile</span>
+        </div>
+        <div class="field">
+          <label>Employment Type</label>
+          <select id="employment_type" onchange="updateFormXP()">
+            <option value="0">Gig Worker</option>
+            <option value="1" selected>Self-Employed</option>
+            <option value="2">Salaried</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Savings -->
+    <div class="form-section">
+      <div class="section-title"><div class="section-icon">🏦</div>Savings Behaviour</div>
+      <div class="field-grid">
+        <div class="slider-field field">
+          <div class="slider-label-row">
+            <label>Savings Rate</label>
+            <span class="slider-val" id="savings_val">0.18</span>
+          </div>
+          <input type="range" id="savings_rate" min="0" max="60" value="18"
+            oninput="document.getElementById('savings_val').textContent=(this.value/100).toFixed(2);updateFormXP()"/>
+          <span class="hint">Fraction of income saved monthly</span>
+        </div>
+        <div class="field">
+          <label>Recurring SIP / Investment</label>
+          <select id="has_recurring_sip" onchange="updateFormXP()">
+            <option value="1" selected>Yes ✓</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tenure -->
+    <div class="form-section">
+      <div class="section-title"><div class="section-icon">📍</div>Tenure & Stability</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Mobile Tenure (months)</label>
+          <input type="number" id="mobile_tenure_months" value="36" min="0" max="240" oninput="updateFormXP()"/>
+          <span class="hint">Months with current number</span>
+        </div>
+        <div class="field">
+          <label>Same Address (months)</label>
+          <input type="number" id="same_address_months" value="24" min="0" max="240" oninput="updateFormXP()"/>
+          <span class="hint">Months at current address</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button class="submit-btn" id="submitBtn" onclick="computeScore()">
+        ⚡ Compute Credit Score
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ VERIFY ══════════ -->
+<div id="page-verify" class="page">
+  <div class="verify-container">
+    <div class="verify-header">
+      <h2>🔍 Lender Verification</h2>
+      <p>Enter a wallet address to verify their on-chain credit score. No personal data is returned — just score + eligibility.</p>
+    </div>
+    <div class="verify-box">
+      <div class="verify-input-row">
+        <input type="text" id="verifyWallet" placeholder="0x wallet address..."/>
+        <button class="verify-btn" onclick="verifyScore()">Verify →</button>
+      </div>
+      <div id="verifyResult" class="verify-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ HOW ══════════ -->
+<div id="page-how" class="page">
+  <div class="how-section">
+    <h2>How NeuroCredit Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-tag">Data Layer</div>
+          <h3>Submit 14 alternative financial signals</h3>
+          <p>UPI patterns, bill payment history, income sources, savings behavior — 14 signals that tell your real financial story. No bank statement, no CIBIL score, no discrimination.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-tag">AI / ML Layer</div>
+          <h3>XGBoost model computes your score</h3>
+          <p>Our gradient-boosted model — trained on 5,000 synthetic profiles mirroring India's informal economy — processes your signals and outputs a score from 300 to 900 in under a second.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-tag">Gamification Layer</div>
+          <h3>Earn XP, badges, and level up your avatar</h3>
+          <p>Your score translates into XP, financial levels (Rookie → Crypto King), and achievement badges. Every good habit moves you closer to the next level.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-tag">Blockchain Layer</div>
+          <h3>Score minted as a Soul Bound Token</h3>
+          <p>Your credit score is written to a non-transferable ERC-5484 SBT on Polygon. Permanently bound to your wallet — cannot be sold, gifted, or faked.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <div class="step-tag">Privacy Layer</div>
+          <h3>Lenders verify without seeing your data</h3>
+          <p>A lender calls <code style="color:var(--accent2);font-family:'Share Tech Mono',monospace;font-size:0.85em">verifyCredit(wallet)</code> and gets: score, grade, eligibility. Nothing else. Raw data never touches the chain.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ RESULT MODAL ══════════ -->
+<div class="result-overlay" id="resultOverlay" onclick="closeResult(event)">
+  <div class="result-card" id="resultCard">
+
+    <div class="result-header">
+      <div class="result-title">⚡ Score Result</div>
+      <button class="result-close" onclick="document.getElementById('resultOverlay').classList.remove('show')">✕ Close</button>
+    </div>
+
+    <div class="result-top">
+      <!-- Avatar -->
+      <div class="risk-avatar-wrap">
+        <div class="risk-avatar" id="riskAvatar">💀</div>
+        <div class="avatar-title" id="avatarTitle">Risk Level</div>
+        <div class="avatar-rank" id="avatarRank">Unranked</div>
+      </div>
+
+      <!-- Score numbers -->
+      <div class="score-main">
+        <div class="score-num-wrap">
+          <div class="score-num" id="scoreNum" style="color:#a29bfe">—</div>
+          <span class="score-out-of">/900</span>
+        </div>
+        <div class="score-grade" id="scoreGrade">—</div>
+        <div class="score-sublabel" id="scoreRisk">—</div>
+        <div id="scoreEligible"></div>
+        <div class="xp-earned" id="xpEarned" style="display:none">⭐ +<span id="xpEarnedNum">0</span> XP Earned!</div>
+      </div>
+    </div>
+
+    <!-- Level bar -->
+    <div class="level-progress-wrap">
+      <div class="level-progress-label">
+        <span class="level-text" id="levelText">Level 1 — Rookie Saver</span>
+        <span class="level-xp" id="levelXpText">0 / 100 XP</span>
+      </div>
+      <div class="level-track">
+        <div class="level-fill" id="levelFill"></div>
+        <div class="level-milestone" style="left:33%"></div>
+        <div class="level-milestone" style="left:66%"></div>
+      </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="badges-section">
+      <div class="badges-title">🎖️ Achievement Badges</div>
+      <div class="badges-grid" id="badgesGrid"></div>
+    </div>
+
+    <!-- Streak -->
+    <div class="streak-row">
+      <div class="streak-card" id="streakCard">
+        <div class="streak-flame" id="streakFlame">🔥</div>
+        <div class="streak-text">
+          <div class="streak-headline" id="streakHeadline">Loading streak...</div>
+          <div class="streak-sub" id="streakSub">Based on your payment consistency</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown + gauge -->
+    <div class="result-breakdown">
+      <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.75rem;
+        letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);
+        margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+        📊 Score Breakdown
+        <span style="flex:1;height:1px;background:var(--border);display:block"></span>
+      </div>
+      <div class="breakdown-grid" id="breakdownBars"></div>
+    </div>
+
+    <div class="result-bottom">
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" width="180" height="100" viewBox="0 0 180 100">
+          <path d="M16 90 A74 74 0 0 1 164 90" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12" stroke-linecap="round"/>
+          <path id="arcFill" d="M16 90 A74 74 0 0 1 164 90" fill="none" stroke="#a29bfe" stroke-width="12" stroke-linecap="round"
+                stroke-dasharray="232" stroke-dashoffset="232"/>
+        </svg>
+        <div style="text-align:center;margin-top:-10px;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--muted);">PERCENTILE</div>
+          <div id="percentileNum" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.8rem;color:var(--accent2);">—</div>
+        </div>
+      </div>
+
+      <div class="mint-section">
+        <button class="mint-btn" id="mintBtn" onclick="mintSBT()">
+          ⛓️ Mint Credit SBT on Polygon →
+        </button>
+        <div class="mint-status" id="mintStatus"></div>
+        <div class="txhash" id="txHash"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  Built for <span>Frostbyte Hackathon 2026</span> &nbsp;·&nbsp;
+  NeuroCredit &nbsp;·&nbsp; AI + Blockchain + FinTech + Gamification
+</footer>
+
+<script>
+// ══════════════════════════════════
+// STARS
+// ══════════════════════════════════
+(function(){
+  const s = document.getElementById('stars');
+  for(let i=0;i<80;i++){
+    const el = document.createElement('div');
+    el.className='star';
+    const size = Math.random()*2+1;
+    el.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      background:#fff;--d:${2+Math.random()*4}s;--del:${Math.random()*4}s;
+    `;
+    s.appendChild(el);
+  }
+})();
+
+// ══════════════════════════════════
+// NAV
+// ══════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const map={home:0,apply:1,verify:2,how:3};
+  if(map[id]!==undefined) document.querySelectorAll('.nav-tab')[map[id]].classList.add('active');
+}
+
+// ══════════════════════════════════
+// SLIDER HELPERS
+// ══════════════════════════════════
+function updateSlider(el, valId) {
+  document.getElementById(valId).textContent=(el.value/100).toFixed(2);
+}
+// init
+['upi_consistency','utility_on_time_pct','mobile_on_time_pct','rent_on_time_pct','income_volatility'].forEach(id=>{
+  const el=document.getElementById(id);
+  const map={upi_consistency:'upi_consistency_val',utility_on_time_pct:'utility_val',
+    mobile_on_time_pct:'mobile_val',rent_on_time_pct:'rent_val',income_volatility:'volatility_val'};
+  if(el&&map[id]) updateSlider(el,map[id]);
+});
+
+// ══════════════════════════════════
+// GAMIFICATION SYSTEM
+// ══════════════════════════════════
+const LEVELS = [
+  {level:1, title:'Rookie Saver',   avatar:'💀', xpMin:0,   xpMax:100,  color:'#e17055'},
+  {level:2, title:'Budget Warrior', avatar:'⚔️', xpMin:100, xpMax:220,  color:'#fd79a8'},
+  {level:3, title:'Bill Slayer',    avatar:'🛡️', xpMin:220, xpMax:380,  color:'#fdcb6e'},
+  {level:4, title:'Savings Scout',  avatar:'💰', xpMin:380, xpMax:580,  color:'#a29bfe'},
+  {level:5, title:'Debt Crusher',   avatar:'⚡', xpMin:580, xpMax:820,  color:'#00cec9'},
+  {level:6, title:'Credit Sage',    avatar:'🔮', xpMin:820, xpMax:1100, color:'#6c5ce7'},
+  {level:7, title:'Investor',       avatar:'📈', xpMin:1100,xpMax:1430, color:'#00b894'},
+  {level:8, title:'DeFi Master',    avatar:'🌐', xpMin:1430,xpMax:1800, color:'#74b9ff'},
+  {level:9, title:'Crypto Sage',    avatar:'💎', xpMin:1800,xpMax:2200, color:'#fd79a8'},
+  {level:10,title:'Crypto King',    avatar:'👑', xpMin:2200,xpMax:9999, color:'#f9ca24'},
+];
+
+const ALL_BADGES = [
+  {id:'payment_hero',  icon:'💳', name:'Payment Hero',   desc:'85%+ on all bills',      condition:r=>r._d.utility>=85&&r._d.mobile>=85&&r._d.rent>=85},
+  {id:'debt_slayer',   icon:'⚔️', name:'Debt Slayer',    desc:'Score ≥ 720',             condition:r=>r.score>=720},
+  {id:'budget_master', icon:'📊', name:'Budget Master',  desc:'Savings rate ≥ 20%',     condition:r=>r._d.savings>=20},
+  {id:'sip_champion',  icon:'📈', name:'SIP Champion',   desc:'Has recurring investment',condition:r=>r._d.sip===1},
+  {id:'consistency_king',icon:'🔗',name:'Consistency',   desc:'UPI consistency ≥ 80%',  condition:r=>r._d.upiCon>=80},
+  {id:'crypto_ready',  icon:'🌐', name:'Crypto Ready',   desc:'Score ≥ 800',             condition:r=>r.score>=800},
+  {id:'multi_income',  icon:'💰', name:'Multi Income',   desc:'3+ income sources',       condition:r=>r._d.incSrc>=3},
+  {id:'stable_base',   icon:'🏠', name:'Stable Base',    desc:'36+ months same address',condition:r=>r._d.addr>=36},
+  {id:'legend',        icon:'👑', name:'Legend',         desc:'Score ≥ 850',             condition:r=>r.score>=850},
+];
+
+function scoreToXP(score) {
+  return Math.round(((score - 300) / 600) * 2200);
+}
+
+function getLevelInfo(xp) {
+  for(let i=LEVELS.length-1;i>=0;i--) {
+    if(xp >= LEVELS[i].xpMin) return LEVELS[i];
+  }
+  return LEVELS[0];
+}
+
+function getAvatarForScore(score) {
+  if(score >= 850) return {emoji:'👑', glow:'rgba(249,202,36,0.5)', label:'Legend', rank:'S-Tier'};
+  if(score >= 800) return {emoji:'💎', glow:'rgba(162,155,254,0.5)', label:'Elite', rank:'A-Tier'};
+  if(score >= 720) return {emoji:'🔮', glow:'rgba(0,206,201,0.45)', label:'Sage', rank:'B-Tier'};
+  if(score >= 650) return {emoji:'⚡', glow:'rgba(253,203,110,0.4)', label:'Warrior', rank:'C-Tier'};
+  if(score >= 580) return {emoji:'🛡️', glow:'rgba(225,112,85,0.4)', label:'Apprentice', rank:'D-Tier'};
+  return {emoji:'💀', glow:'rgba(225,112,85,0.3)', label:'Beginner', rank:'F-Tier'};
+}
+
+function getStreak(consistency, paymentAvg) {
+  const avg = (consistency + paymentAvg) / 2;
+  if(avg >= 0.9)  return {flame:'🔥🔥🔥', headline:'On fire! 6-month payment streak!', sub:'Flawless consistency — lenders will love you'};
+  if(avg >= 0.75) return {flame:'🔥🔥', headline:'3-month streak — keep it up!', sub:'Your payment habits are building fast'};
+  if(avg >= 0.55) return {flame:'🔥', headline:'1-month streak — gaining momentum', sub:'Improve consistency to unlock bonus XP'};
+  return {flame:'❄️', headline:'No active streak yet', sub:'Pay bills on time to start a streak'};
+}
+
+// ══════════════════════════════════
+// FORM XP (live preview)
+// ══════════════════════════════════
+function updateFormXP() {
+  const payload = gatherPayload();
+  const r = localScore(payload);
+  const xp = scoreToXP(r.score);
+  const lvl = getLevelInfo(xp);
+  const nextLvl = LEVELS[Math.min(lvl.level, LEVELS.length-1)];
+  const pct = lvl.xpMax===9999 ? 100 : Math.round(((xp - lvl.xpMin)/(lvl.xpMax-lvl.xpMin))*100);
+
+  document.getElementById('formAvatar').firstChild.textContent = lvl.avatar;
+  document.getElementById('formLevel').textContent = lvl.level;
+  document.getElementById('formLevelTitle').textContent = `${lvl.title} · Level ${lvl.level}`;
+  document.getElementById('formXpBar').style.width = pct+'%';
+  document.getElementById('formXpCur').textContent = xp+' XP';
+  document.getElementById('formXpMax').textContent = lvl.xpMax===9999 ? 'MAX LEVEL' : `${lvl.xpMax-xp} XP to Level ${lvl.level+1}`;
+}
+
+function gatherPayload() {
+  return {
+    wallet_address:       document.getElementById('wallet').value.trim()||'0x0000',
+    upi_txn_count:        parseInt(document.getElementById('upi_txn_count').value)||0,
+    upi_avg_amount:       parseFloat(document.getElementById('upi_avg_amount').value)||0,
+    upi_consistency:      parseFloat(document.getElementById('upi_consistency').value)/100,
+    utility_on_time_pct:  parseFloat(document.getElementById('utility_on_time_pct').value)/100,
+    mobile_on_time_pct:   parseFloat(document.getElementById('mobile_on_time_pct').value)/100,
+    rent_on_time_pct:     parseFloat(document.getElementById('rent_on_time_pct').value)/100,
+    income_sources:       parseInt(document.getElementById('income_sources').value)||1,
+    monthly_income_est:   parseFloat(document.getElementById('monthly_income_est').value)||0,
+    income_volatility:    parseFloat(document.getElementById('income_volatility').value)/100,
+    savings_rate:         parseFloat(document.getElementById('savings_rate').value)/100,
+    has_recurring_sip:    parseInt(document.getElementById('has_recurring_sip').value),
+    mobile_tenure_months: parseInt(document.getElementById('mobile_tenure_months').value)||0,
+    same_address_months:  parseInt(document.getElementById('same_address_months').value)||0,
+    employment_type:      parseInt(document.getElementById('employment_type').value),
+  };
+}
+
+// run once on load
+updateFormXP();
+
+// ══════════════════════════════════
+// COMPUTE SCORE
+// ══════════════════════════════════
+async function computeScore() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>Computing...';
+
+  const payload = gatherPayload();
+  const wallet = payload.wallet_address;
+
+  let result;
+  try {
+    const res = await fetch('http://localhost:8000/api/score',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    result = await res.json();
+  } catch(e) {
+    result = localScore(payload);
+  }
+
+  btn.disabled=false;
+  btn.innerHTML='⚡ Compute Credit Score';
+
+  // Attach raw data for badge evaluation
+  result._d = {
+    utility: Math.round(payload.utility_on_time_pct*100),
+    mobile:  Math.round(payload.mobile_on_time_pct*100),
+    rent:    Math.round(payload.rent_on_time_pct*100),
+    savings: Math.round(payload.savings_rate*100),
+    sip:     payload.has_recurring_sip,
+    upiCon:  Math.round(payload.upi_consistency*100),
+    incSrc:  payload.income_sources,
+    addr:    payload.same_address_months,
+    consBase:(payload.upi_consistency + payload.utility_on_time_pct + payload.mobile_on_time_pct)/3,
+  };
+
+  window._lastResult = result;
+  window._storedScores = window._storedScores||{};
+  window._storedScores[wallet.toLowerCase()] = result;
+
+  // Save to sessionStorage and open result in new tab
+  sessionStorage.setItem('neurocredit_result', JSON.stringify(result));
+  sessionStorage.setItem('neurocredit_wallet', wallet);
+  window.open('result.html', '_blank');
+}
+
+// ══════════════════════════════════
+// LOCAL SCORING
+// ══════════════════════════════════
+function localScore(d) {
+  let score=300;
+  score+=(d.utility_on_time_pct*80+d.mobile_on_time_pct*60+d.rent_on_time_pct*80);
+  score+=(Math.min(d.upi_txn_count/200,1)*80+d.upi_consistency*70);
+  score+=(Math.min(d.monthly_income_est/100000,1)*60+(1-d.income_volatility)*50+d.income_sources*8);
+  score+=(d.savings_rate/0.6*50+d.has_recurring_sip*20);
+  score+=(Math.min(d.mobile_tenure_months/120,1)*25+Math.min(d.same_address_months/84,1)*25+d.employment_type*10);
+  score=Math.round(Math.min(Math.max(score,300),900));
+
+  let grade,risk,eligible,color;
+  if(score>=800){grade='Excellent';risk='Very Low';eligible=true;color='#00b894';}
+  else if(score>=720){grade='Good';risk='Low';eligible=true;color='#00cec9';}
+  else if(score>=650){grade='Fair';risk='Medium';eligible=true;color='#fdcb6e';}
+  else if(score>=580){grade='Poor';risk='High';eligible=false;color='#e17055';}
+  else{grade='Very Poor';risk='Very High';eligible=false;color='#d63031';}
+
+  const breakdown={
+    'Payment History':Math.round((d.utility_on_time_pct*0.4+d.mobile_on_time_pct*0.3+d.rent_on_time_pct*0.3)*100),
+    'Transaction Activity':Math.round((Math.min(d.upi_txn_count/200,1)*0.5+d.upi_consistency*0.5)*100),
+    'Income Stability':Math.round(((1-d.income_volatility)*0.6+Math.min(d.income_sources/4,1)*0.4)*100),
+    'Savings Behaviour':Math.round((d.savings_rate/0.6*0.7+d.has_recurring_sip*0.3)*100),
+    'Tenure & Stability':Math.round((Math.min(d.mobile_tenure_months/120,1)*0.5+Math.min(d.same_address_months/84,1)*0.5)*100),
+  };
+  return{score,grade,risk_level:risk,eligible,color,percentile:Math.round((score-300)/6),breakdown};
+}
+
+// ══════════════════════════════════
+// SHOW RESULT
+// ══════════════════════════════════
+function showResult(r) {
+  document.getElementById('resultOverlay').classList.add('show');
+  document.getElementById('mintBtn').className='mint-btn';
+  document.getElementById('mintBtn').textContent='⛓️ Mint Credit SBT on Polygon →';
+  document.getElementById('mintStatus').textContent='';
+  document.getElementById('mintStatus').className='mint-status';
+  document.getElementById('txHash').textContent='';
+
+  // Avatar
+  const av = getAvatarForScore(r.score);
+  const avatarEl = document.getElementById('riskAvatar');
+  avatarEl.textContent = av.emoji;
+  avatarEl.style.setProperty('--avatar-glow', av.glow);
+  document.getElementById('avatarTitle').textContent = av.label;
+  document.getElementById('avatarRank').textContent = av.rank;
+
+  // Score counter
+  const scoreEl = document.getElementById('scoreNum');
+  scoreEl.style.color = r.color;
+  scoreEl.textContent='—';
+  document.getElementById('scoreGrade').textContent = r.grade;
+  document.getElementById('scoreGrade').style.color = r.color;
+  document.getElementById('scoreRisk').textContent = r.risk_level + ' Risk';
+
+  const eligEl = document.getElementById('scoreEligible');
+  eligEl.innerHTML = r.eligible
+    ? '<div class="eligible-pill eligible-yes">✓ Eligible for Credit</div>'
+    : '<div class="eligible-pill eligible-no">✗ Not Currently Eligible</div>';
+
+  // Animate score
+  let cur=300, target=r.score;
+  const step=Math.ceil((target-300)/50);
+  const iv=setInterval(()=>{
+    cur=Math.min(cur+step,target);
+    scoreEl.textContent=cur;
+    if(cur>=target)clearInterval(iv);
+  },20);
+
+  // XP
+  const xp=scoreToXP(r.score);
+  const lvl=getLevelInfo(xp);
+  const xpEarned = document.getElementById('xpEarned');
+  xpEarned.style.display='flex';
+  document.getElementById('xpEarnedNum').textContent=xp;
+
+  // Level bar
+  const pct = lvl.xpMax===9999 ? 100 : Math.round(((xp-lvl.xpMin)/(lvl.xpMax-lvl.xpMin))*100);
+  document.getElementById('levelText').textContent=`Level ${lvl.level} — ${lvl.title}`;
+  document.getElementById('levelXpText').textContent=`${xp} / ${lvl.xpMax} XP`;
+  setTimeout(()=>{ document.getElementById('levelFill').style.width=pct+'%'; },200);
+
+  // Percentile
+  const pctEl=document.getElementById('percentileNum');
+  pctEl.textContent='—';
+  setTimeout(()=>{
+    let pc=0,tg=r.percentile||Math.round((r.score-300)/6);
+    const piv=setInterval(()=>{pc=Math.min(pc+2,tg);pctEl.textContent=pc+'th';if(pc>=tg)clearInterval(piv);},20);
+  },400);
+
+  // Arc
+  const arc=document.getElementById('arcFill');
+  arc.style.stroke=r.color;
+  const pctScore=(r.score-300)/600;
+  setTimeout(()=>{
+    arc.style.transition='stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
+    arc.style.strokeDashoffset=232*(1-pctScore);
+  },100);
+
+  // Breakdown cards
+  const barsEl=document.getElementById('breakdownBars');
+  barsEl.innerHTML='';
+  const bColors=['#a29bfe','#00cec9','#fdcb6e','#00b894','#fd79a8'];
+  Object.entries(r.breakdown).forEach(([label,val],i)=>{
+    barsEl.innerHTML+=`
+      <div class="bk-card">
+        <div class="bk-header">
+          <span class="bk-label">${label}</span>
+          <span class="bk-pct" style="color:${bColors[i]}">${val}%</span>
+        </div>
+        <div class="bk-track">
+          <div class="bk-fill" id="bkf${i}" style="width:0%;background:${bColors[i]}"></div>
+        </div>
+      </div>`;
+  });
+  setTimeout(()=>{ Object.values(r.breakdown).forEach((v,i)=>{ document.getElementById('bkf'+i).style.width=v+'%'; }); },200);
+
+  // Badges
+  const badgesEl=document.getElementById('badgesGrid');
+  badgesEl.innerHTML='';
+  ALL_BADGES.forEach(b=>{
+    const earned = b.condition(r);
+    badgesEl.innerHTML+=`
+      <div class="badge ${earned?'earned':'locked'}" title="${b.desc}">
+        ${earned?'<span class="badge-new">NEW</span>':''}
+        <span class="badge-icon">${b.icon}</span>
+        <span class="badge-name">${b.name}</span>
+      </div>`;
+  });
+
+  // Streak
+  const streak=getStreak(r._d?.consBase||0.7, (r._d?.utility||80)/100);
+  document.getElementById('streakFlame').textContent=streak.flame;
+  document.getElementById('streakHeadline').textContent=streak.headline;
+  document.getElementById('streakSub').textContent=streak.sub;
+
+  // HUD
+  const earnedCount = ALL_BADGES.filter(b=>b.condition(r)).length;
+  document.getElementById('gameHud').classList.add('show');
+  document.getElementById('hudLevel').textContent=lvl.level;
+  document.getElementById('hudXP').textContent=xp;
+  document.getElementById('hudBadges').textContent=earnedCount;
+  document.getElementById('hudScore').textContent=r.score;
+
+  // XP float
+  spawnXpFloat('+'+xp+' XP');
+  showToast('🏆 '+lvl.title+' (Level '+lvl.level+')', lvl.color);
+}
+
+function closeResult(e) {
+  if(e.target.id==='resultOverlay')
+    document.getElementById('resultOverlay').classList.remove('show');
+}
+
+// ══════════════════════════════════
+// MINT
+// ══════════════════════════════════
+async function mintSBT() {
+  const btn=document.getElementById('mintBtn');
+  const status=document.getElementById('mintStatus');
+  const txEl=document.getElementById('txHash');
+  btn.classList.add('minting');
+  const steps=[
+    ['⏳ Connecting to Polygon...','Initialising MetaMask connection...'],
+    ['⏳ Preparing transaction...','Building ERC-5484 SBT payload...'],
+    ['⏳ Awaiting confirmation...','Transaction submitted to mempool...'],
+  ];
+  for(const [btnTxt,stTxt] of steps){
+    btn.textContent=btnTxt; status.textContent=stTxt;
+    await sleep(1000+Math.random()*600);
+  }
+  const fakeTx='0x'+[...Array(64)].map(()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+  const tokenId=Math.floor(Math.random()*9000)+1000;
+  btn.textContent='✓ SBT Minted!';
+  btn.classList.remove('minting');
+  btn.style.borderColor='rgba(0,184,148,0.5)';
+  btn.style.color='#00b894';
+  btn.style.background='rgba(0,184,148,0.08)';
+  status.className='mint-status success';
+  status.textContent=`Token #${tokenId} minted on Polygon Amoy`;
+  txEl.textContent=`Tx: ${fakeTx}`;
+  showToast('⛓️ SBT Minted! Token #'+tokenId,'#00b894');
+}
+
+// ══════════════════════════════════
+// VERIFY
+// ══════════════════════════════════
+async function verifyScore() {
+  const wallet=document.getElementById('verifyWallet').value.trim().toLowerCase();
+  const resultEl=document.getElementById('verifyResult');
+  resultEl.className='verify-result';
+  resultEl.innerHTML='<div style="color:var(--muted);font-family:\'Share Tech Mono\',monospace;font-size:0.78rem">⏳ Querying on-chain records...</div>';
+  resultEl.classList.add('show');
+  await sleep(900);
+
+  let found=false,data=null;
+  try{
+    const res=await fetch('http://localhost:8000/api/verify',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({wallet_address:wallet})
+    });
+    data=await res.json(); found=data.found;
+  } catch(e){
+    const stored=(window._storedScores||{})[wallet];
+    if(stored){found=true;data=stored;}
+  }
+
+  if(!found){
+    resultEl.innerHTML=`<div class="verify-not-found">
+      <div style="font-size:2rem;margin-bottom:8px">⚠️</div>
+      No Credit SBT found for this wallet address.
+    </div>`;
+    return;
+  }
+
+  const score=data.score;
+  const grade=data.grade||(score>=800?'Excellent':score>=720?'Good':score>=650?'Fair':score>=580?'Poor':'Very Poor');
+  const eligible=data.eligible!==undefined?data.eligible:score>=650;
+  const color=score>=800?'#00b894':score>=720?'#00cec9':score>=650?'#fdcb6e':score>=580?'#e17055':'#d63031';
+  const tokenId=Math.floor(Math.random()*9000)+1000;
+  const xp=scoreToXP(score);
+  const lvl=getLevelInfo(xp);
+  const av=getAvatarForScore(score);
+
+  resultEl.innerHTML=`
+    <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.2rem;">
+      <div style="font-size:2.5rem;background:var(--bg2);border:1px solid var(--border);
+        border-radius:12px;width:60px;height:60px;display:flex;align-items:center;
+        justify-content:center;box-shadow:0 0 20px ${color}40">${av.emoji}</div>
+      <div>
+        <div class="verify-score-big" style="color:${color}">${score}</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;color:var(--muted);">${lvl.title} · Level ${lvl.level}</div>
+      </div>
+      <div style="margin-left:auto">
+        <div class="${eligible?'eligible-pill eligible-yes':'eligible-pill eligible-no'}">
+          ${eligible?'✓ Eligible':'✗ Not Eligible'}
+        </div>
+      </div>
+    </div>
+    <div class="verify-meta">
+      Grade: <strong style="color:${color}">${grade}</strong> &nbsp;·&nbsp;
+      XP: <strong>${xp}</strong> &nbsp;·&nbsp;
+      Percentile: <strong>${Math.round((score-300)/6)}th</strong><br/>
+      Token ID: #${tokenId} &nbsp;·&nbsp; Polygon Amoy Testnet<br/>
+      <span style="color:var(--accent2);font-family:'Share Tech Mono',monospace;font-size:0.68rem">${wallet}</span>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════
+// UTILS
+// ══════════════════════════════════
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function showToast(msg, color='#a29bfe') {
+  const t=document.createElement('div');
+  t.className='toast';
+  t.style.borderColor=color+'55';
+  t.innerHTML=`<span style="color:${color}">${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.5s';setTimeout(()=>t.remove(),500);},3000);
+}
+
+function spawnXpFloat(txt) {
+  const el=document.createElement('div');
+  el.className='xp-float';
+  el.textContent=txt;
+  el.style.left=(30+Math.random()*40)+'%';
+  el.style.top='60%';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
+
+// 3D card mouse parallax
+const card3d=document.getElementById('hero3dCard');
+if(card3d){
+  document.addEventListener('mousemove',e=>{
+    const rect=card3d.getBoundingClientRect();
+    const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    const dx=(e.clientX-cx)/window.innerWidth*20;
+    const dy=(e.clientY-cy)/window.innerHeight*20;
+    card3d.style.transform=`rotateX(${-dy+4}deg) rotateY(${dx-4}deg)`;
+  });
+}
+
+// Animate hero score
+let heroDir=1, heroScore=742;
+setInterval(()=>{
+  heroScore+=heroDir*(Math.random()<0.5?1:2);
+  if(heroScore>780){heroDir=-1;}
+  if(heroScore<700){heroDir=1;}
+  const el=document.getElementById('heroScore');
+  if(el) el.textContent=heroScore;
+},500);
+</script>
+</body>
+</html>
