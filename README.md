@@ -57,26 +57,109 @@ XGBoost ML Model   Polygon Smart Contract
 
 ## Key Features
 
-### ML Model
-- Trained on 5,000 synthetic profiles mirroring India's informal economy
-- 14 input features across 5 categories
-- XGBoost with regularisation — MAE < 20 points, R² > 0.95
-- Scoring breakdown by category (Payment History, Transaction Activity, Income Stability, Savings Behaviour, Tenure)
+🔹 Layer 1 — AI Credit Scoring
+14 alternative financial signals across 5 categories
+Model: GradientBoostingRegressor
+Output: Score (300–900) + explainability breakdown
 
-### Smart Contract (`NeuroCredit.sol`)
-- ERC-5484 Soul Bound Token — permanently bound to wallet, non-transferable
-- One SBT per wallet address
-- `mintCredit(wallet, score, eligible, metadataURI)` — issuer only
-- `updateScore(wallet, newScore, ...)` — refreshable as financial behaviour improves
-- `verifyCredit(wallet)` — public lender endpoint, returns score + grade + eligibility
-- Transfer locked: `transferFrom` reverts with custom error
+📈 Performance
 
-### Privacy Model
-- Raw financial data **never** stored on-chain
-- Lenders only see: score (300–900), grade, eligibility boolean
-- Future: ZK-proof layer so even the score derivation is private
+MAE: 13.2
+R²: 0.84
 
----
+🔹 Layer 2 — Blockchain Ownership
+
+Score is minted as an ERC-5484 Soul Bound Token
+
+Key Properties:
+
+❌ Non-transferable
+👤 User-owned
+🔄 Updatable
+🔐 Tamper-proof
+
+🔹 Layer 3 — Verification
+
+Lenders call:
+verifyCredit(address wallet)
+Returns:
+
+Credit score
+Grade
+Eligibility
+Last update timestamp
+
+✅ No personal data exposed
+
+| Layer      | Technologies                        |
+| ---------- | ----------------------------------- |
+| ML         | Python, scikit-learn, NumPy, Pandas |
+| Backend    | FastAPI, Pydantic                   |
+| Blockchain | Solidity, Polygon (Amoy), MetaMask  |
+| Frontend   | HTML, CSS, JavaScript               |
+| Dev Tools  | Hardhat, Git, VS Code               |
+
+
+🧪 ML Pipeline
+5,000 synthetic user profiles
+Realistic distributions (UPI, income, savings patterns)
+Feature scaling via StandardScaler
+
+Noise added for realism:
+
+ϵ∼N(0,15)
+
+Weighted scoring model:
+
+Payment History — 35%
+Transactions — 25%
+Income — 20%
+Savings — 10%
+Stability — 10%
+
+🔗 Smart Contract Features
+mintCredit() → Issue SBT
+updateScore() → Refresh score
+verifyCredit() → Public verification
+Transfer functions → Hard-reverted (non-transferable)
+
+🌐 End-to-End Flow
+User submits financial behavior data
+ML model generates score
+Score is minted as SBT
+Lender verifies score via blockchain
+
+⚡ Key Innovations
+✅ Alternative data scoring for underserved users
+🔗 Credit score as user-owned asset
+🔒 Privacy-first verification (no raw data exposed)
+🌉 Works for both Web2 lenders & DeFi protocols
+
+🧗 Challenges
+Defining fair and unbiased signals
+Working with early-stage SBT standard (ERC-5484)
+Bridging Web2 APIs with Web3 trust models
+Preventing synthetic data overfitting
+
+🏆 Achievements
+📊 <2.3% scoring error across full range
+🔗 Fully working blockchain integration
+🔄 End-to-end pipeline functional
+🔐 Strong privacy-preserving design
+
+📚 What We Learned
+Alternative data must be carefully curated
+SBTs enable self-sovereign identity
+Adoption depends on ease, not just innovation
+Financial inclusion requires real-world understanding
+
+🎯 Vision
+
+A world where financial trust is earned by behavior — and owned by the individual.
+
+🏁 Built For
+
+🏆 Frostbyte Hackathon 2026
 
 
 
